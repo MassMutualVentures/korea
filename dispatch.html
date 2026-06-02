@@ -61,7 +61,25 @@
             </div>
             <div class="field">
               <label for="onlineTransferBank">转款银行</label>
-              <input id="onlineTransferBank" name="online_transfer_bank">
+              <select id="onlineTransferBank" name="online_transfer_bank">
+                <option value="">请选择银行</option>
+                <option>KB国民银行</option>
+                <option>友利银行</option>
+                <option>农协银行</option>
+                <option>企业银行</option>
+                <option>Kakao Bank</option>
+                <option>全北银行</option>
+                <option>光州银行</option>
+                <option>济州银行</option>
+                <option>釜山银行</option>
+                <option>庆南银行</option>
+                <option>大邱银行</option>
+                <option>水协银行</option>
+                <option>韩国开发银行</option>
+                <option>韩国进出口银行</option>
+                <option>SC第一银行</option>
+                <option>花旗银行韩国</option>
+              </select>
             </div>
             <div class="field">
               <label for="onlineTransferAmount">转款金额</label>
@@ -406,7 +424,12 @@
               </div>
               <div class="field">
                 <label>转款银行</label>
-                <input name="online_transfer_bank" value="${TaskFlow.escapeAttr(task.online_transfer_bank)}">
+                <select name="online_transfer_bank">
+                  <option value="">请选择银行</option>
+                  ${['KB国民银行','友利银行','农协银行','企业银行','Kakao Bank','全北银行','光州银行','济州银行','釜山银行','庆南银行','大邱银行','水协银行','韩国开发银行','韩国进出口银行','SC第一银行','花旗银行韩国'].map((b) =>
+                    `<option${task.online_transfer_bank === b ? ' selected' : ''}>${TaskFlow.escapeHtml(b)}</option>`
+                  ).join('')}
+                </select>
               </div>
             </div>
             <div class="field">
