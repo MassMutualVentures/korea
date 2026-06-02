@@ -11,7 +11,11 @@
 ## 文件
 
 - `Code.gs`：Apps Script 后端逻辑。
-- `Index.html`：网页前端。
+- `index.html`：登录页，登录后按权限进入对应工作台。
+- `dispatch.html`：派发方工作台。
+- `receive.html`：接收方工作台。
+- `taskflow-api.js`：前端连接 Apps Script 的共享接口。
+- `taskflow.css`：共享样式。
 - `appsscript.json`：Apps Script 项目配置。
 
 ## 部署步骤
@@ -45,8 +49,13 @@ const APP_SCRIPT_API_URL = '';
 const APP_SCRIPT_API_URL = 'https://script.google.com/macros/s/xxxxxxx/exec';
 ```
 
-4. 把 `Index.html` 上传到 GitHub 仓库。
-5. 在 GitHub 仓库设置里开启 Pages，入口文件就是这个 `Index.html`。
+4. 把这些文件一起上传到 GitHub 仓库根目录：
+   - `index.html`
+   - `dispatch.html`
+   - `receive.html`
+   - `taskflow-api.js`
+   - `taskflow.css`
+5. 在 GitHub 仓库设置里开启 Pages，入口文件是小写的 `index.html`。
 
 线上支付的汇款图片会保存到 Google Drive 的 `TaskFlow Transfer Proofs` 文件夹，Sheet 里保存文件链接。首次授权时会出现 Drive 权限，这是图片上传所需。
 

@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>接收工作台</title>
+  <link rel="stylesheet" href="taskflow.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>接收工作台</h1>
+      <div class="nav">
+        <a class="button secondary" href="dispatch.html" id="dispatchLink">派发工作台</a>
+        <span class="account" id="account"></span>
+        <button class="secondary" type="button" id="logoutButton">退出</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="stat"><span>新任务</span><strong id="statPending">0</strong></div>
+      <div class="stat"><span>已接收待转账</span><strong id="statAccepted">0</strong></div>
+      <div class="stat"><span>待我确认收款</span><strong id="statProof">0</strong></div>
+      <div class="stat"><span>已拒绝</span><strong id="statRejected">0</strong></div>
+    </div>
+
+    <section>
+      <div class="tabs">
+        <button class="tab active" data-tab="pending" type="button">新任务</button>
+        <button class="tab" data-tab="accepted" type="button">已接收待转账</button>
+        <button class="tab" data-tab="proof" type="button">待确认收款</button>
+        <button class="tab" data-tab="history" type="button">我的历史</button>
+      </div>
+      <div class="section-body">
+        <div id="historyToolbar" class="toolbar hidden">
+          <input id="historyKeyword" placeholder="搜索历史">
+          <button class="secondary" type="button" id="historySearch">搜索</button>
+        </div>
+        <div id="taskList" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="taskflow-api.js"></script>
+  <script>
+    let state = { tab: 'pending', tasks: [], history: [], refreshing: false, lastSignature: '' };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!TaskFlow.requireLogin()) return;
+      bindEvents();
+      load();
+      setInterval(renderTimers, 30000);
+      setInterval(refreshQuietly, 15000);
+    });
+
+    function bindEvents() {
+      document.getElementById('logoutButton').addEventListener('click', async () => {
+        await TaskFlow.logout();
+        location.href = 'index.html';
+      });
+      document.getElementById('historySearch').addEventListener('click', searchHistory);
+      document.querySelectorAll('.tab').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.tab = button.dataset.tab;
+          document.querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
+          button.classList.add('active');
+          render();
+        });
+      });
+    }
+
+    async function load() {
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.dashboard();
+        applyDashboard(data, false);
+      } catch (error) {
+        if (isSessionError(error)) {
+          TaskFlow.clearSession();
+          location.href = 'index.html';
+          return;
+        }
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    async function refreshQuietly() {
+      if (state.refreshing || document.hidden) return;
+      state.refreshing = true;
+      try {
+        const data = await TaskFlow.dashboard();
+        applyDashboard(data, true);
+      } catch (error) {
+        if (isSessionError(error)) {
+          TaskFlow.clearSession();
+          location.href = 'index.html';
+        }
+      } finally {
+        state.refreshing = false;
+      }
+    }
+
+    function applyDashboard(data, notifyChange) {
+      const user = data.user || {};
+      TaskFlow.saveUser(user);
+      if (!user.canReceive) {
+        location.href = user.canDispatch ? 'dispatch.html' : 'index.html';
+        return;
+      }
+      const nextSignature = taskSignature(data);
+      if (notifyChange && state.lastSignature && nextSignature !== state.lastSignature) {
+        TaskFlow.toast('任务状态已更新');
+      }
+      state.lastSignature = nextSignature;
+      document.getElementById('dispatchLink').classList.toggle('hidden', !user.canDispatch);
+      document.getElementById('account').innerHTML = TaskFlow.currentUserLabel();
+      state.tasks = data.tasks || [];
+      state.history = data.history || [];
+      renderStats(data.stats || {});
+      render();
+    }
+
+    function taskSignature(data) {
+      return (data.tasks || [])
+        .map((task) => [task.task_id, task.status, task.accepted_by, task.confirmed_at, task.transfer_proof_url, task.updated_at].join(':'))
+        .join('|') + `#${(data.history || []).length}`;
+    }
+
+    function isSessionError(error) {
+      const text = error && error.message ? error.message : String(error);
+      return text.indexOf('登录') !== -1 || text.indexOf('请先') !== -1;
+    }
+
+    async function searchHistory() {
+      try {
+        TaskFlow.setLoading(true);
+        state.history = await TaskFlow.searchHistory(document.getElementById('historyKeyword').value);
+        render();
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    async function accept(taskId) {
+      const task = findTask(taskId);
+      const payload = { confirmation_note: valueOf(`acceptNote-${taskId}`) };
+      if (task.task_type === '线上支付') {
+        payload.payment_card_holder = valueOf(`cardHolder-${taskId}`);
+        payload.payment_card_number = valueOf(`cardNumber-${taskId}`);
+        payload.payment_receiving_bank = valueOf(`receivingBank-${taskId}`);
+      } else {
+        payload.offline_collection_date = valueOf(`collectionDate-${taskId}`);
+      }
+
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.acceptTask(taskId, payload);
+        applyDashboard(data);
+        TaskFlow.toast(task.task_type === '线下收款' ? '已确认收款并完结' : '已接收任务');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    async function reject(taskId) {
+      const note = valueOf(`rejectNote-${taskId}`);
+      if (!note) {
+        TaskFlow.toast('请填写拒绝原因');
+        return;
+      }
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.rejectTask(taskId, note);
+        applyDashboard(data);
+        TaskFlow.toast('任务已拒绝');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    async function confirmReceipt(taskId) {
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.confirmReceipt(taskId, valueOf(`receiptNote-${taskId}`));
+        applyDashboard(data);
+        TaskFlow.toast('已确认收款，任务完结');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    function renderStats(stats) {
+      document.getElementById('statPending').textContent = stats.pending || 0;
+      document.getElementById('statAccepted').textContent = stats.accepted || 0;
+      document.getElementById('statProof').textContent = stats.proofUploaded || 0;
+      document.getElementById('statRejected').textContent = stats.rejected || 0;
+    }
+
+    function visibleRows() {
+      if (state.tab === 'history') return state.history;
+      const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款' };
+      return state.tasks.filter((task) => task.status === map[state.tab]);
+    }
+
+    function render() {
+      document.getElementById('historyToolbar').classList.toggle('hidden', state.tab !== 'history');
+      const rows = visibleRows();
+      document.getElementById('taskList').innerHTML = rows.length ? rows.map(renderTask).join('') : '<div class="empty">暂无数据</div>';
+      renderTimers();
+    }
+
+    function renderTask(task) {
+      return `
+        <article class="task">
+          <div class="task-head">
+            <div>
+              <div class="task-title">${TaskFlow.escapeHtml(task.title)}</div>
+              <div class="meta">
+                <span>类型：${TaskFlow.escapeHtml(task.task_type)}</span>
+                <span>派发：${TaskFlow.escapeHtml(task.dispatcher || '-')}</span>
+                <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
+              </div>
+            </div>
+            <div class="badges">
+              <span class="badge ${statusClass(task.status)}">${TaskFlow.escapeHtml(task.status)}</span>
+              ${timer(task)}
+            </div>
+          </div>
+          <div class="data-grid">${task.task_type === '线上支付' ? onlineFields(task) : offlineFields(task)}</div>
+          ${returnInfo(task)}
+          ${proofPreview(task)}
+          ${actions(task)}
+        </article>
+      `;
+    }
+
+    function onlineFields(task) {
+      return items([
+        ['组长', task.online_leader],
+        ['转款银行', task.online_transfer_bank],
+        ['转款金额', task.online_transfer_amount],
+        ['派发时间', task.created_at],
+      ]);
+    }
+
+    function offlineFields(task) {
+      return items([
+        ['组长', task.offline_business_name],
+        ['公司名', task.offline_company_name],
+        ['客户名字', task.offline_customer_name],
+        ['日期时间', task.offline_datetime],
+        ['金额', task.offline_amount],
+        ['币种', task.offline_currency],
+        ['料子', task.offline_material],
+        ['次数', task.offline_times],
+        ['维护期', task.offline_maintenance_period],
+        ['尾刀客户', task.offline_tail_customer || '否'],
+        ['联系方式', task.offline_contact || '不写'],
+        ['详细地址', task.offline_address],
+      ]);
+    }
+
+    function returnInfo(task) {
+      const rows = [];
+      if (task.payment_card_holder) rows.push(['户主姓名', task.payment_card_holder]);
+      if (task.payment_card_number) rows.push(['卡号', task.payment_card_number]);
+      if (task.payment_receiving_bank) rows.push(['收款银行', task.payment_receiving_bank]);
+      if (task.offline_collection_date) rows.push(['收款日期', task.offline_collection_date]);
+      if (task.transfer_proof_url) rows.push(['汇款图片', `<a href="${TaskFlow.escapeAttr(task.transfer_proof_url)}" target="_blank">打开图片</a>`, true]);
+      return rows.length ? `<h3>已返回信息</h3><div class="data-grid">${items(rows)}</div>` : '';
+    }
+
+    function proofPreview(task) {
+      if (!task.transfer_proof_url) return '';
+      const url = TaskFlow.escapeAttr(task.transfer_proof_url);
+      return `
+        <div class="proof-preview">
+          <a href="${url}" target="_blank">汇款图片</a>
+          <img src="${url}" alt="汇款图片" loading="lazy">
+        </div>
+      `;
+    }
+
+    function actions(task) {
+      if (task.status === '待接收') {
+        if (task.task_type === '线上支付') {
+          return `
+            <div class="actions">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="cardHolder-${task.task_id}">户主姓名</label>
+                  <input id="cardHolder-${task.task_id}">
+                </div>
+                <div class="field">
+                  <label for="receivingBank-${task.task_id}">收款银行</label>
+                  <input id="receivingBank-${task.task_id}">
+                </div>
+              </div>
+              <div class="field">
+                <label for="cardNumber-${task.task_id}">卡号</label>
+                <input id="cardNumber-${task.task_id}">
+              </div>
+              ${commonAcceptReject(task)}
+            </div>
+          `;
+        }
+        return `
+          <div class="actions">
+            <div class="field">
+              <label for="collectionDate-${task.task_id}">收款日期</label>
+              <input id="collectionDate-${task.task_id}" type="date">
+            </div>
+            ${commonAcceptReject(task, '确认收款并完结')}
+          </div>
+        `;
+      }
+
+      if (task.status === '已接收') {
+        return '<div class="actions"><div class="desc">已接收，等待派发方上传汇款图片。</div></div>';
+      }
+
+      if (task.status === '待确认收款') {
+        return `
+          <div class="actions">
+            <div class="field">
+              <label for="receiptNote-${task.task_id}">确认备注</label>
+              <textarea id="receiptNote-${task.task_id}" placeholder="确认到账后提交"></textarea>
+            </div>
+            <button type="button" onclick="confirmReceipt('${task.task_id}')">确认收款并完结</button>
+          </div>
+        `;
+      }
+      return '';
+    }
+
+    function commonAcceptReject(task, acceptText) {
+      return `
+        <div class="field">
+          <label for="acceptNote-${task.task_id}">备注</label>
+          <textarea id="acceptNote-${task.task_id}"></textarea>
+        </div>
+        <div class="button-row">
+          <button type="button" onclick="accept('${task.task_id}')">${acceptText || '确认接收'}</button>
+          <button class="danger" type="button" onclick="reject('${task.task_id}')">拒绝</button>
+        </div>
+        <div class="field">
+          <label for="rejectNote-${task.task_id}">拒绝原因</label>
+          <textarea id="rejectNote-${task.task_id}"></textarea>
+        </div>
+      `;
+    }
+
+    function items(rows) {
+      return rows.map(([label, value, raw]) => `<div class="data-item"><span>${TaskFlow.escapeHtml(label)}</span>${raw ? value : TaskFlow.escapeHtml(value || '-')}</div>`).join('');
+    }
+
+    function timer(task) {
+      const start = task.status === '待接收' ? task.created_at : task.confirmed_at;
+      if (!start || task.status === '已拒绝' || task.status === '已完结') return '';
+      const value = TaskFlow.formatTimer(start);
+      return `<span class="timer ${value.color}" data-start="${TaskFlow.escapeAttr(start)}">${value.label}</span>`;
+    }
+
+    function renderTimers() {
+      document.querySelectorAll('.timer[data-start]').forEach((node) => {
+        const value = TaskFlow.formatTimer(node.dataset.start);
+        node.classList.remove('green', 'yellow', 'red');
+        node.classList.add(value.color);
+        node.textContent = value.label;
+      });
+    }
+
+    function findTask(taskId) {
+      return state.tasks.find((task) => task.task_id === taskId) || {};
+    }
+
+    function valueOf(id) {
+      const node = document.getElementById(id);
+      return node ? node.value.trim() : '';
+    }
+
+    function statusClass(status) {
+      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
+    }
+  </script>
+</body>
+</html>
