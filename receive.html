@@ -195,7 +195,22 @@
         TaskFlow.setLoading(true);
         const data = await TaskFlow.confirmReceipt(taskId, valueOf(`receiptNote-${taskId}`));
         applyDashboard(data);
-        TaskFlow.toast('已确认收款，任务完结');
+        TaskFlow.toast('已确认收款，等待派发方上分');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    async function rejectProof(taskId) {
+      const note = valueOf(`rejectProofNote-${taskId}`);
+      if (!note) { TaskFlow.toast('请填写未收到款的原因'); return; }
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.rejectProof(taskId, note);
+        applyDashboard(data);
+        TaskFlow.toast('已标记未收到款，请等待派发方重新上传');
       } catch (error) {
         TaskFlow.toast(error.message || String(error));
       } finally {
@@ -211,7 +226,15 @@
     }
 
     function visibleRows() {
-      if (state.tab === 'history') return state.history;
+      if (state.tab === 'history') {
+        // 待上分确认（我处理过的）也并入历史展示
+        const myUsername = (TaskFlow.user() || {}).username || '';
+        const creditPending = state.tasks.filter((t) =>
+          t.status === '待上分确认' &&
+          String(t.accepted_by || '').toLowerCase() === myUsername.toLowerCase()
+        );
+        return [...creditPending, ...state.history];
+      }
       const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款' };
       return state.tasks.filter((task) => task.status === map[state.tab]);
     }
@@ -279,19 +302,19 @@
       if (task.payment_card_number) rows.push(['卡号', task.payment_card_number]);
       if (task.payment_receiving_bank) rows.push(['收款银行', task.payment_receiving_bank]);
       if (task.offline_collection_date) rows.push(['收款日期', task.offline_collection_date]);
-      if (task.transfer_proof_url) rows.push(['汇款图片', `<a href="${TaskFlow.escapeAttr(task.transfer_proof_url)}" target="_blank">打开图片</a>`, true]);
       return rows.length ? `<h3>已返回信息</h3><div class="data-grid">${items(rows)}</div>` : '';
     }
 
     function proofPreview(task) {
-      if (!task.transfer_proof_url) return '';
-      const url = TaskFlow.escapeAttr(task.transfer_proof_url);
-      return `
-        <div class="proof-preview">
-          <a href="${url}" target="_blank">汇款图片</a>
-          <img src="${url}" alt="汇款图片" loading="lazy">
+      const urls = TaskFlow.parseProofUrls(task.transfer_proof_url);
+      if (!urls.length) return '';
+      const imgs = urls.map((url, i) => `
+        <div class="proof-item">
+          <a href="${TaskFlow.escapeAttr(url)}" target="_blank">图片 ${i + 1}</a>
+          <img src="${TaskFlow.escapeAttr(url)}" alt="汇款图片 ${i + 1}" loading="lazy">
         </div>
-      `;
+      `).join('');
+      return `<div class="proof-preview"><div class="proof-label">汇款图片（${urls.length} 张）</div>${imgs}</div>`;
     }
 
     function actions(task) {
@@ -340,9 +363,14 @@
               <textarea id="receiptNote-${task.task_id}" placeholder="确认到账后提交"></textarea>
             </div>
             <button type="button" onclick="confirmReceipt('${task.task_id}')">确认收款</button>
+            <div class="cancel-bar">
+              <input id="rejectProofNote-${task.task_id}" placeholder="未收到款原因（必填）" style="max-width:260px">
+              <button class="danger" type="button" onclick="rejectProof('${task.task_id}')">未收到款</button>
+            </div>
           </div>
         `;
       }
+
       if (task.status === '待上分确认') {
         return '<div class="actions"><div class="desc">已确认收款，等待派发方确认上分后完结。</div></div>';
       }
@@ -396,7 +424,7 @@
     }
 
     function statusClass(status) {
-      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
+      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已取消': 'cancelled', '已完结': 'completed' }[status] || '';
     }
   </script>
 </body>
