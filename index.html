@@ -506,7 +506,19 @@
           <div id="onlineFields">
             <div class="field">
               <label for="onlineLeader">组长</label>
-              <input id="onlineLeader" name="online_leader">
+              <select id="onlineLeader" name="online_leader">
+                <option value="">请选择组长</option>
+                <option>刘总</option>
+                <option>山河</option>
+                <option>军阀</option>
+                <option>阿阳</option>
+                <option>小志</option>
+                <option>三七</option>
+                <option>胖虎</option>
+                <option>天顺</option>
+                <option>燃燃</option>
+                <option>杨不封</option>
+              </select>
             </div>
             <div class="field">
               <label for="onlineTransferBank">转款银行</label>
@@ -521,7 +533,19 @@
           <div id="offlineFields" class="hidden">
             <div class="field">
               <label for="offlineBusinessName">业务名字</label>
-              <input id="offlineBusinessName" name="offline_business_name">
+              <select id="offlineBusinessName" name="offline_business_name">
+                <option value="">请选择组长</option>
+                <option>刘总</option>
+                <option>山河</option>
+                <option>军阀</option>
+                <option>阿阳</option>
+                <option>小志</option>
+                <option>三七</option>
+                <option>胖虎</option>
+                <option>天顺</option>
+                <option>燃燃</option>
+                <option>杨不封</option>
+              </select>
             </div>
             <div class="field">
               <label for="offlineCompanyName">公司名</label>
@@ -613,7 +637,7 @@
   <script>
     // GitHub Pages 部署时，把 Apps Script Web App URL 填到这里。
     // 例：https://script.google.com/macros/s/xxxxxxx/exec
-    const APP_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbzKR-Ru-IclyTCsUtTCJ7rEsk6F4luP2bnXq6rSszK5_TGfa0M6Zc_-5LZNpYeHYZgW8w/exec';
+    const APP_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbzB7WdgT-kOLAwlt2Dikh13yMaHGWHQAauXONw4JgJr/dev';
     const TOKEN_KEY = 'taskFlowToken';
     const hasGoogleRuntime = typeof google !== 'undefined' && google.script && google.script.run;
     const hasApiRuntime = !!APP_SCRIPT_API_URL;
