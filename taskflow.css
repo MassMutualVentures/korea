@@ -382,6 +382,7 @@ button:disabled {
 .accepted, .completed, .timer.green { background: #f0fdf4; color: #15803d; }
 .proof { background: #eff6ff; color: #1d4ed8; }
 .credit { background: #faf5ff; color: #7c3aed; }
+.cancelled { background: #f1f5f9; color: #64748b; }
 .rejected, .timer.red { background: #fef2f2; color: #b91c1c; }
 .timer.yellow { background: #fffbeb; color: #b45309; }
 
@@ -418,27 +419,40 @@ button:disabled {
   font-size: 13px;
 }
 
-/* Proof image */
+/* Proof images */
 .proof-preview {
   margin: 0 16px 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 12px;
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.proof-preview a {
-  display: inline-block;
-  margin-bottom: 10px;
+.proof-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.proof-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proof-item a {
   color: var(--blue);
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
 }
 
-.proof-preview a:hover { text-decoration: underline; }
+.proof-item a:hover { text-decoration: underline; }
 
-.proof-preview img {
+.proof-item img {
   display: block;
   max-width: 300px;
   max-height: 260px;
@@ -447,6 +461,34 @@ button:disabled {
   background: #fff;
   object-fit: contain;
 }
+
+/* Inline edit form inside task card */
+.edit-form {
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.edit-form .field:last-of-type { margin-bottom: 14px; }
+
+.edit-btn {
+  min-height: 28px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Cancel bar inside actions */
+.cancel-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  flex-wrap: wrap;
+}
+
+.cancel-bar input { flex: 1; min-width: 160px; }
 
 /* Actions area at bottom of task card */
 .actions {
