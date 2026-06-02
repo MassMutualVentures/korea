@@ -1,5 +1,5 @@
 const TaskFlow = (() => {
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwOGHyyjQo1ORewQH6xr7Jun79IDlihKWH46Bpu2m6PXTdDVvFvzJqk1sUuMyVj9TVxjg/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzw_qTBlfTzKnjku5aC9HHvN8qCWpuv4vKOwpzi7cL0hzlRLlXM340BbDgI5g0KNpvaKw/exec';
   const TOKEN_KEY = 'taskFlowToken';
   const USER_KEY = 'taskFlowUser';
 
