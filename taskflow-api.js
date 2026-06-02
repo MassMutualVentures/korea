@@ -1,5 +1,5 @@
 const TaskFlow = (() => {
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzNaII5vfQH-kkEG7Piy0Nn75QmzNwOHdO9xVnmQ5UVSOkRwJthfYJe7qOz_kRkNiYaeA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxrUAtL0midDcREeoOnliZHku0UO1jkKgtDFwebgTCMP1Kf8iX4X71NGyS4--cOqVHmYg/exec';
   const TOKEN_KEY = 'taskFlowToken';
   const USER_KEY = 'taskFlowUser';
 
@@ -109,6 +109,63 @@ const TaskFlow = (() => {
     });
   }
 
+  function confirmCredit(taskId, note) {
+    return request('confirmCredit', {
+      token: token(),
+      taskId,
+      note: note || '',
+    });
+  }
+
+  function cancelTask(taskId, note) {
+    return request('cancelTask', {
+      token: token(),
+      taskId,
+      note: note || '',
+    });
+  }
+
+  function rejectProof(taskId, note) {
+    return request('rejectProof', {
+      token: token(),
+      taskId,
+      note: note || '',
+    });
+  }
+
+  function updateTask(taskId, payload) {
+    return request('updateTask', {
+      token: token(),
+      taskId,
+      payload: JSON.stringify(payload || {}),
+    });
+  }
+
+  function listUsers() {
+    return request('listUsers', { token: token() });
+  }
+
+  function toggleUserActive(username) {
+    return request('toggleUserActive', { token: token(), username });
+  }
+
+  function adminCreateUser(username, password, name, role) {
+    return request('createUser', { token: token(), username, password, name, role });
+  }
+
+  function adminResetPassword(username, newPassword) {
+    return request('resetUserPassword', { token: token(), username, newPassword });
+  }
+
+  function parseProofUrls(value) {
+    const str = String(value || '').trim();
+    if (!str) return [];
+    if (str.charAt(0) === '[') {
+      try { return JSON.parse(str); } catch (e) {}
+    }
+    return [str];
+  }
+
   function searchHistory(keyword) {
     return request('searchHistory', {
       token: token(),
@@ -118,12 +175,66 @@ const TaskFlow = (() => {
 
   async function uploadTransferProof(taskId, file, dataUrl) {
     const compressed = await compressImage(dataUrl);
-    return request('uploadTransferProof', {
+    const base64 = compressed.replace(/^data:[^;]+;base64,/, '');
+    return iframePost({
+      action: 'uploadTransferProof',
       token: token(),
       taskId,
       name: file.name,
       mimeType: 'image/jpeg',
-      data: compressed,
+      data: base64,
+    });
+  }
+
+  // Cross-origin POST via hidden iframe (window.name transport).
+  // Apps Script doPost sets window.name then returns OK;
+  // we navigate the iframe back to same origin to read it.
+  function iframePost(fields) {
+    return new Promise((resolve, reject) => {
+      const frameName = `tf_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+      const iframe = document.createElement('iframe');
+      iframe.name = frameName;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = API_URL;
+      form.target = frameName;
+      form.style.display = 'none';
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+
+      let phase = 0;
+      const cleanup = () => { iframe.remove(); form.remove(); };
+
+      iframe.onload = () => {
+        if (phase === 0) {
+          // GAS responded; navigate back to same origin so we can read window.name
+          phase = 1;
+          iframe.src = location.href;
+        } else {
+          try {
+            const payload = JSON.parse(iframe.contentWindow.name);
+            if (!payload.ok) reject(new Error(payload.error || '上传失败'));
+            else resolve(payload.result);
+          } catch (err) {
+            reject(new Error('上传响应解析失败'));
+          } finally {
+            cleanup();
+          }
+        }
+      };
+
+      iframe.onerror = () => { reject(new Error('上传失败，请重试')); cleanup(); };
+
+      form.submit();
     });
   }
 
@@ -214,6 +325,15 @@ const TaskFlow = (() => {
     acceptTask,
     rejectTask,
     confirmReceipt,
+    confirmCredit,
+    cancelTask,
+    rejectProof,
+    updateTask,
+    listUsers,
+    toggleUserActive,
+    adminCreateUser,
+    adminResetPassword,
+    parseProofUrls,
     searchHistory,
     uploadTransferProof,
     requireLogin,
