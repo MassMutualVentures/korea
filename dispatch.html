@@ -11,6 +11,7 @@
     <div class="header-inner">
       <h1>派发工作台</h1>
       <div class="nav">
+        <a class="button secondary" href="admin.html" id="adminLink" style="display:none">用户管理</a>
         <a class="button secondary" href="receive.html" id="receiveLink">接收工作台</a>
         <span class="account" id="account"></span>
         <button class="secondary" type="button" id="logoutButton">退出</button>
@@ -157,6 +158,7 @@
           <button class="tab" data-tab="proof" type="button">待确认收款</button>
           <button class="tab" data-tab="credit" type="button">待上分确认</button>
           <button class="tab" data-tab="rejected" type="button">已拒绝</button>
+          <button class="tab" data-tab="cancelled" type="button">已取消</button>
           <button class="tab" data-tab="history" type="button">历史</button>
         </div>
         <div class="section-body">
@@ -174,7 +176,7 @@
 
   <script src="taskflow-api.js"></script>
   <script>
-    let state = { tab: 'pending', tasks: [], history: [], firstLoad: true, refreshing: false, lastSignature: '' };
+    let state = { tab: 'pending', tasks: [], history: [], firstLoad: true, refreshing: false, lastSignature: '', editingTaskId: null };
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!TaskFlow.requireLogin()) return;
@@ -255,6 +257,7 @@
       }
       state.lastSignature = nextSignature;
       document.getElementById('receiveLink').classList.toggle('hidden', !user.canReceive);
+      document.getElementById('adminLink').classList.toggle('hidden', !user.isAdmin);
       document.getElementById('account').innerHTML = TaskFlow.currentUserLabel();
       state.tasks = data.tasks || [];
       state.history = data.history || [];
@@ -354,7 +357,7 @@
 
     function visibleRows() {
       if (state.tab === 'history') return state.history;
-      const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款', credit: '待上分确认', rejected: '已拒绝' };
+      const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款', credit: '待上分确认', rejected: '已拒绝', cancelled: '已取消' };
       return state.tasks.filter((task) => task.status === map[state.tab]);
     }
 
@@ -365,7 +368,146 @@
       renderTimers();
     }
 
+    const EDITABLE_STATUSES = ['待接收', '已接收', '已拒绝'];
+
+    function toggleEdit(taskId) {
+      state.editingTaskId = (state.editingTaskId === taskId) ? null : taskId;
+      render();
+    }
+
+    async function saveEdit(taskId) {
+      const form = document.getElementById(`editForm-${taskId}`);
+      const payload = Object.fromEntries(new FormData(form).entries());
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.updateTask(taskId, payload);
+        state.editingTaskId = null;
+        applyDashboard(data);
+        TaskFlow.toast('订单已更新');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
+    function editForm(task) {
+      if (task.task_type === '线上支付') {
+        return `
+          <form id="editForm-${task.task_id}" class="edit-form">
+            <div class="grid-2">
+              <div class="field">
+                <label>组长</label>
+                <select name="online_leader">
+                  ${['刘总','山河','军阀','阿阳','小志','三七','胖虎','天顺','燃燃','杨不封'].map((n) =>
+                    `<option${task.online_leader === n ? ' selected' : ''}>${TaskFlow.escapeHtml(n)}</option>`
+                  ).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>转款银行</label>
+                <input name="online_transfer_bank" value="${TaskFlow.escapeAttr(task.online_transfer_bank)}">
+              </div>
+            </div>
+            <div class="field">
+              <label>转款金额</label>
+              <input name="online_transfer_amount" value="${TaskFlow.escapeAttr(task.online_transfer_amount)}">
+            </div>
+            <div class="field">
+              <label>备注</label>
+              <textarea name="description">${TaskFlow.escapeHtml(task.description)}</textarea>
+            </div>
+            <div class="button-row">
+              <button type="button" onclick="saveEdit('${task.task_id}')">保存</button>
+              <button class="secondary" type="button" onclick="toggleEdit('${task.task_id}')">取消</button>
+            </div>
+          </form>
+        `;
+      }
+      return `
+        <form id="editForm-${task.task_id}" class="edit-form">
+          <div class="grid-2">
+            <div class="field">
+              <label>组长</label>
+              <select name="offline_business_name">
+                ${['刘总','山河','军阀','阿阳','小志','三七','胖虎','天顺','燃燃','杨不封'].map((n) =>
+                  `<option${task.offline_business_name === n ? ' selected' : ''}>${TaskFlow.escapeHtml(n)}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>公司名</label>
+              <input name="offline_company_name" value="${TaskFlow.escapeAttr(task.offline_company_name)}">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>客户名字</label>
+              <input name="offline_customer_name" value="${TaskFlow.escapeAttr(task.offline_customer_name)}">
+            </div>
+            <div class="field">
+              <label>日期时间</label>
+              <input name="offline_datetime" type="datetime-local" value="${TaskFlow.escapeAttr(task.offline_datetime)}">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>金额</label>
+              <input name="offline_amount" value="${TaskFlow.escapeAttr(task.offline_amount)}">
+            </div>
+            <div class="field">
+              <label>币种</label>
+              <input name="offline_currency" value="${TaskFlow.escapeAttr(task.offline_currency)}">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>料子</label>
+              <input name="offline_material" value="${TaskFlow.escapeAttr(task.offline_material)}">
+            </div>
+            <div class="field">
+              <label>次数</label>
+              <input name="offline_times" value="${TaskFlow.escapeAttr(task.offline_times)}">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>维护期</label>
+              <input name="offline_maintenance_period" value="${TaskFlow.escapeAttr(task.offline_maintenance_period)}">
+            </div>
+            <div class="field">
+              <label>尾刀客户</label>
+              <select name="offline_tail_customer">
+                <option${task.offline_tail_customer !== '是' ? ' selected' : ''}>否</option>
+                <option${task.offline_tail_customer === '是' ? ' selected' : ''}>是</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>联系方式</label>
+              <input name="offline_contact" value="${TaskFlow.escapeAttr(task.offline_contact)}">
+            </div>
+          </div>
+          <div class="field">
+            <label>详细地址</label>
+            <textarea name="offline_address">${TaskFlow.escapeHtml(task.offline_address)}</textarea>
+          </div>
+          <div class="field">
+            <label>备注</label>
+            <textarea name="description">${TaskFlow.escapeHtml(task.description)}</textarea>
+          </div>
+          <div class="button-row">
+            <button type="button" onclick="saveEdit('${task.task_id}')">保存</button>
+            <button class="secondary" type="button" onclick="toggleEdit('${task.task_id}')">取消</button>
+          </div>
+        </form>
+      `;
+    }
+
     function renderTask(task) {
+      const isEditing = state.editingTaskId === task.task_id;
+      const canEdit = EDITABLE_STATUSES.indexOf(task.status) !== -1;
       return `
         <article class="task">
           <div class="task-head">
@@ -373,6 +515,7 @@
             <div class="badges">
               <span class="badge ${statusClass(task.status)}">${TaskFlow.escapeHtml(task.status)}</span>
               ${timer(task)}
+              ${canEdit ? `<button class="secondary edit-btn" type="button" onclick="toggleEdit('${task.task_id}')">${isEditing ? '取消编辑' : '编辑'}</button>` : ''}
             </div>
           </div>
           <div class="meta">
@@ -381,9 +524,7 @@
             <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
             ${task.created_at ? `<span>创建：${TaskFlow.escapeHtml(task.created_at)}</span>` : ''}
           </div>
-          <div class="data-grid">${task.task_type === '线上支付' ? onlineFields(task) : offlineFields(task)}</div>
-          ${receiverInfo(task)}
-          ${proofPreview(task)}
+          ${isEditing ? editForm(task) : `<div class="data-grid">${task.task_type === '线上支付' ? onlineFields(task) : offlineFields(task)}</div>${receiverInfo(task)}${proofPreview(task)}`}
           ${actions(task)}
         </article>
       `;
@@ -421,42 +562,65 @@
       if (task.payment_card_number) rows.push(['卡号', task.payment_card_number]);
       if (task.payment_receiving_bank) rows.push(['收款银行', task.payment_receiving_bank]);
       if (task.offline_collection_date) rows.push(['收款日期', task.offline_collection_date]);
-      if (task.transfer_proof_url) rows.push(['汇款图片', `<a href="${TaskFlow.escapeAttr(task.transfer_proof_url)}" target="_blank">打开图片</a>`, true]);
       return rows.length ? `<h3>接收方返回信息</h3><div class="data-grid">${items(rows)}</div>` : '';
     }
 
     function proofPreview(task) {
-      if (!task.transfer_proof_url) return '';
-      const url = TaskFlow.escapeAttr(task.transfer_proof_url);
+      const urls = TaskFlow.parseProofUrls(task.transfer_proof_url);
+      if (!urls.length) return '';
+      const imgs = urls.map((url, i) => `
+        <div class="proof-item">
+          <a href="${TaskFlow.escapeAttr(url)}" target="_blank">图片 ${i + 1}</a>
+          <img src="${TaskFlow.escapeAttr(url)}" alt="汇款图片 ${i + 1}" loading="lazy">
+        </div>
+      `).join('');
+      return `<div class="proof-preview"><div class="proof-label">汇款图片（${urls.length} 张）</div>${imgs}</div>`;
+    }
+
+    const CANCELLABLE = ['待接收', '已接收', '待确认收款', '待上分确认', '已拒绝'];
+
+    function cancelBar(task) {
+      if (CANCELLABLE.indexOf(task.status) === -1) return '';
       return `
-        <div class="proof-preview">
-          <a href="${url}" target="_blank">汇款图片</a>
-          <img src="${url}" alt="汇款图片" loading="lazy">
+        <div class="cancel-bar">
+          <input id="cancelNote-${task.task_id}" placeholder="取消原因（选填）" style="max-width:260px">
+          <button class="danger" type="button" onclick="cancelTask('${task.task_id}')">取消订单</button>
         </div>
       `;
     }
 
     function actions(task) {
-      if (task.status === '已接收' && task.task_type === '线上支付') {
+      const canUpload = task.task_type === '线上支付' && (task.status === '已接收' || task.status === '待确认收款');
+      if (canUpload) {
         return `
           <div class="actions">
             <div class="field">
-              <label for="proof-${task.task_id}">上传汇款图片</label>
+              <label for="proof-${task.task_id}">上传汇款图片（可多次上传）</label>
               <input id="proof-${task.task_id}" type="file" accept="image/*">
             </div>
-            <button type="button" onclick="uploadProof('${task.task_id}')">上传汇款图片</button>
+            <div class="button-row">
+              <button type="button" onclick="uploadProof('${task.task_id}')">上传图片</button>
+            </div>
+            ${cancelBar(task)}
           </div>
         `;
       }
-      if (task.status === '待接收') return '<div class="actions"><div class="desc">等待接收方处理。</div></div>';
-      if (task.status === '待确认收款') return '<div class="actions"><div class="desc">等待接收方确认收款。</div></div>';
+      if (task.status === '待接收') {
+        return `<div class="actions">${cancelBar(task)}<div class="desc">等待接收方处理。</div></div>`;
+      }
       if (task.status === '待上分确认') {
         return `
           <div class="actions">
             <div class="desc">接收方已确认收款，请核实后点击确认上分完结任务。</div>
-            <button type="button" onclick="confirmCredit('${task.task_id}')">确认上分</button>
+            <div class="button-row">
+              <button type="button" onclick="confirmCredit('${task.task_id}')">确认上分</button>
+            </div>
+            ${cancelBar(task)}
           </div>
         `;
+      }
+      if (task.status === '已拒绝') {
+        return `<div class="actions">${cancelBar(task)}</div>`;
       }
       return '';
     }
@@ -481,8 +645,22 @@
       });
     }
 
+    async function cancelTask(taskId) {
+      const note = document.getElementById(`cancelNote-${taskId}`);
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.cancelTask(taskId, note ? note.value.trim() : '');
+        applyDashboard(data);
+        TaskFlow.toast('订单已取消');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
     function statusClass(status) {
-      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
+      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已取消': 'cancelled', '已完结': 'completed' }[status] || '';
     }
   </script>
 </body>
