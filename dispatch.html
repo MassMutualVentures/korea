@@ -23,6 +23,7 @@
       <div class="stat"><span>待接收</span><strong id="statPending">0</strong></div>
       <div class="stat"><span>已接收待汇款</span><strong id="statAccepted">0</strong></div>
       <div class="stat"><span>待确认收款</span><strong id="statProof">0</strong></div>
+      <div class="stat"><span>待上分确认</span><strong id="statCredit">0</strong></div>
       <div class="stat"><span>已拒绝</span><strong id="statRejected">0</strong></div>
     </div>
 
@@ -154,6 +155,7 @@
           <button class="tab active" data-tab="pending" type="button">待接收</button>
           <button class="tab" data-tab="accepted" type="button">已接收待汇款</button>
           <button class="tab" data-tab="proof" type="button">待确认收款</button>
+          <button class="tab" data-tab="credit" type="button">待上分确认</button>
           <button class="tab" data-tab="rejected" type="button">已拒绝</button>
           <button class="tab" data-tab="history" type="button">历史</button>
         </div>
@@ -302,6 +304,19 @@
       }
     }
 
+    async function confirmCredit(taskId) {
+      try {
+        TaskFlow.setLoading(true);
+        const data = await TaskFlow.confirmCredit(taskId, '确认上分');
+        applyDashboard(data);
+        TaskFlow.toast('已确认上分，任务完结');
+      } catch (error) {
+        TaskFlow.toast(error.message || String(error));
+      } finally {
+        TaskFlow.setLoading(false);
+      }
+    }
+
     async function uploadProof(taskId) {
       const input = document.getElementById(`proof-${taskId}`);
       if (!input.files || !input.files[0]) {
@@ -333,12 +348,13 @@
       document.getElementById('statPending').textContent = stats.pending || 0;
       document.getElementById('statAccepted').textContent = stats.accepted || 0;
       document.getElementById('statProof').textContent = stats.proofUploaded || 0;
+      document.getElementById('statCredit').textContent = stats.creditPending || 0;
       document.getElementById('statRejected').textContent = stats.rejected || 0;
     }
 
     function visibleRows() {
       if (state.tab === 'history') return state.history;
-      const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款', rejected: '已拒绝' };
+      const map = { pending: '待接收', accepted: '已接收', proof: '待确认收款', credit: '待上分确认', rejected: '已拒绝' };
       return state.tasks.filter((task) => task.status === map[state.tab]);
     }
 
@@ -353,18 +369,17 @@
       return `
         <article class="task">
           <div class="task-head">
-            <div>
-              <div class="task-title">${TaskFlow.escapeHtml(task.title)}</div>
-              <div class="meta">
-                <span>类型：${TaskFlow.escapeHtml(task.task_type)}</span>
-                <span>派发：${TaskFlow.escapeHtml(task.dispatcher || '-')}</span>
-                <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
-              </div>
-            </div>
+            <div class="task-title">${TaskFlow.escapeHtml(task.title)}</div>
             <div class="badges">
               <span class="badge ${statusClass(task.status)}">${TaskFlow.escapeHtml(task.status)}</span>
               ${timer(task)}
             </div>
+          </div>
+          <div class="meta">
+            <span>类型：${TaskFlow.escapeHtml(task.task_type)}</span>
+            <span>派发：${TaskFlow.escapeHtml(task.dispatcher || '-')}</span>
+            <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
+            ${task.created_at ? `<span>创建：${TaskFlow.escapeHtml(task.created_at)}</span>` : ''}
           </div>
           <div class="data-grid">${task.task_type === '线上支付' ? onlineFields(task) : offlineFields(task)}</div>
           ${receiverInfo(task)}
@@ -435,6 +450,14 @@
       }
       if (task.status === '待接收') return '<div class="actions"><div class="desc">等待接收方处理。</div></div>';
       if (task.status === '待确认收款') return '<div class="actions"><div class="desc">等待接收方确认收款。</div></div>';
+      if (task.status === '待上分确认') {
+        return `
+          <div class="actions">
+            <div class="desc">接收方已确认收款，请核实后点击确认上分完结任务。</div>
+            <button type="button" onclick="confirmCredit('${task.task_id}')">确认上分</button>
+          </div>
+        `;
+      }
       return '';
     }
 
@@ -459,7 +482,7 @@
     }
 
     function statusClass(status) {
-      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
+      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
     }
   </script>
 </body>
