@@ -227,18 +227,17 @@
       return `
         <article class="task">
           <div class="task-head">
-            <div>
-              <div class="task-title">${TaskFlow.escapeHtml(task.title)}</div>
-              <div class="meta">
-                <span>类型：${TaskFlow.escapeHtml(task.task_type)}</span>
-                <span>派发：${TaskFlow.escapeHtml(task.dispatcher || '-')}</span>
-                <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
-              </div>
-            </div>
+            <div class="task-title">${TaskFlow.escapeHtml(task.title)}</div>
             <div class="badges">
               <span class="badge ${statusClass(task.status)}">${TaskFlow.escapeHtml(task.status)}</span>
               ${timer(task)}
             </div>
+          </div>
+          <div class="meta">
+            <span>类型：${TaskFlow.escapeHtml(task.task_type)}</span>
+            <span>派发：${TaskFlow.escapeHtml(task.dispatcher || '-')}</span>
+            <span>接收：${TaskFlow.escapeHtml(task.accepted_by || '-')}</span>
+            ${task.created_at ? `<span>创建：${TaskFlow.escapeHtml(task.created_at)}</span>` : ''}
           </div>
           <div class="data-grid">${task.task_type === '线上支付' ? onlineFields(task) : offlineFields(task)}</div>
           ${returnInfo(task)}
@@ -340,9 +339,12 @@
               <label for="receiptNote-${task.task_id}">确认备注</label>
               <textarea id="receiptNote-${task.task_id}" placeholder="确认到账后提交"></textarea>
             </div>
-            <button type="button" onclick="confirmReceipt('${task.task_id}')">确认收款并完结</button>
+            <button type="button" onclick="confirmReceipt('${task.task_id}')">确认收款</button>
           </div>
         `;
+      }
+      if (task.status === '待上分确认') {
+        return '<div class="actions"><div class="desc">已确认收款，等待派发方确认上分后完结。</div></div>';
       }
       return '';
     }
@@ -394,7 +396,7 @@
     }
 
     function statusClass(status) {
-      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
+      return { '待接收': 'pending', '已接收': 'accepted', '待确认收款': 'proof', '待上分确认': 'credit', '已拒绝': 'rejected', '已完结': 'completed' }[status] || '';
     }
   </script>
 </body>
