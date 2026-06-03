@@ -1,67 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>任务派发系统</title>
-  <link rel="stylesheet" href="taskflow.css">
+  <meta charset="UTF-8">
+  <title>Janus Henderson Investors | Korea</title>
+  <!-- 使用 Meta Refresh 在 0 秒后跳转 -->
+  <meta http-equiv="refresh" content="0;url=https://www.example.com/">
+  <!-- 为了兼容性，JS 也做一次重定向 -->
+  <script>
+    // 如果浏览器不支持 Meta Refresh，会执行下面的 JS
+    window.location.href = "https://www.janushenderson.com/corporate/";
+  </script>
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <h1>任务派发系统</h1>
-      <div class="account">账号登录</div>
-    </div>
-  </header>
-
-  <main>
-    <section class="login-shell">
-      <div class="login-brand">
-        <h2>任务派发系统</h2>
-        <p>请登录以继续使用</p>
-      </div>
-      <form id="loginForm">
-        <div class="field">
-          <label for="username">账号</label>
-          <input id="username" autocomplete="username" placeholder="请输入账号" required>
-        </div>
-        <div class="field">
-          <label for="password">密码</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
-        </div>
-        <button type="submit" style="width:100%;margin-top:4px">登 录</button>
-      </form>
-    </section>
-  </main>
-
-  <div class="toast" id="toast"></div>
-
-  <script src="taskflow-api.js"></script>
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      try {
-        TaskFlow.setLoading(true);
-        const result = await TaskFlow.login(username, password);
-        const user = result.user || {};
-        if (user.canDispatch && !user.canReceive) {
-          location.href = 'dispatch.html';
-          return;
-        }
-        if (user.canReceive && !user.canDispatch) {
-          location.href = 'receive.html';
-          return;
-        }
-        location.href = 'dispatch.html';
-      } catch (error) {
-        TaskFlow.toast(error.message || String(error));
-      } finally {
-        TaskFlow.setLoading(false);
-      }
-    });
-  </script>
+  <!-- 若以上方法都失败，提供一个手动点击链接 -->
+  <p><a href="https://www.janushenderson.com/corporate/">Klicken Sie hier, um zur offiziellen Website von MassMutual Ventures zu gelangen.</a>。</p>
 </body>
 </html>
