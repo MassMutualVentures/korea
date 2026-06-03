@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>JH One 전용계좌 안내</title>
+</head>
+<body>
+  <h1>JH One 전용계좌 안내</h1>
+  <p>카카오톡 메시지를 통해 전용계좌 서비스 페이지로 이동할 수 있습니다.</p>
+
+  <button id="kakao-share-btn">카카오톡으로 공유하기</button>
+
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js"></script>
+  <script>
+    Kakao.init("72882ee1d0e728a0cc6e69176eda5a56");
+
+    document.getElementById("kakao-share-btn").addEventListener("click", function () {
+      Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "JH One 전용계좌 안내",
+          description: "전용계좌 서비스 페이지로 바로 이동하세요.",
+          imageUrl: "https://janushenderson.one/app/app2.png",
+          link: {
+            mobileWebUrl: "https://janushenderson.one/app/handel/",
+            webUrl: "https://janushenderson.one/app/handel/"
+          }
+        },
+        buttons: [
+          {
+            title: "전용계좌 바로가기",
+            link: {
+              mobileWebUrl: "https://janushenderson.one/app/handel/",
+              webUrl: "https://janushenderson.one/app/handel/"
+            }
+          }
+        ]
+      });
+    });
+  </script>
+</body>
+</html>
