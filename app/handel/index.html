@@ -21,6 +21,7 @@
             height: 100%;
             overflow: hidden;
             touch-action: manipulation;
+            font-family: Arial, "Apple SD Gothic Neo", sans-serif;
         }
 
         iframe {
@@ -29,10 +30,145 @@
             height: 100dvh;
             border: none;
         }
+
+        .top-guide {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0, 0, 0, 0.50);
+            pointer-events: none;
+            animation: guideFadeOut 0.6s ease forwards;
+            animation-delay: 5s;
+        }
+
+        .top-guide.is-visible {
+            display: block;
+        }
+
+        .guide-arrow {
+            position: fixed;
+            top: 10px;
+            right: 4px;
+            width: 145px;
+            height: 145px;
+            transform-origin: 92% 8%;
+            animation: arrowPulse 0.95s ease-in-out infinite;
+            filter:
+                drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45))
+                drop-shadow(0 0 13px rgba(255, 230, 0, 0.75));
+        }
+
+        .guide-arrow svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .guide-box {
+            position: fixed;
+            top: 132px;
+            left: 22px;
+            right: 22px;
+            padding: 20px 22px 18px;
+            border-radius: 20px;
+            background: rgba(15, 15, 15, 0.94);
+            color: #fff;
+            box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42);
+            word-break: keep-all;
+        }
+
+        .guide-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 32px;
+            padding: 0 14px;
+            margin-bottom: 12px;
+            border-radius: 999px;
+            background: #ffe600;
+            color: #111;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .guide-title {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 25px;
+            line-height: 1.2;
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+
+        .guide-text {
+            display: block;
+            color: #f4f4f4;
+            font-size: 18.5px;
+            line-height: 1.43;
+            font-weight: 650;
+            letter-spacing: 0;
+        }
+
+        .guide-text strong {
+            color: #ffe600;
+            font-weight: 850;
+        }
+
+        .guide-note {
+            display: block;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 17px;
+            line-height: 1.42;
+            color: #f4f4f4;
+            font-weight: 650;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% {
+                opacity: 0.55;
+                transform: translate(0, 0) scale(0.92);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translate(7px, -7px) scale(1.08);
+            }
+        }
+
+        @keyframes guideFadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
     </style>
 </head>
 <body>
-    <iframe src="https://www.njvksdfa.com"></iframe>
+    <iframe id="app-frame" src="https://www.njvksdfa.com"></iframe>
+
+    <div class="top-guide" id="top-guide">
+        <div class="guide-arrow">
+            <svg viewBox="0 0 160 160" aria-hidden="true">
+                <path d="M22 126 L128 34" fill="none" stroke="#ffe600" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M82 34 H128 V80" fill="none" stroke="#ffe600" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <div class="guide-box">
+            <span class="guide-badge">TIP</span>
+            <span class="guide-title">창을 작게 띄우려면<br>오른쪽 위를 눌러주세요</span>
+            <span class="guide-text">
+                오른쪽 위 <strong>아래쪽 화살표</strong>를 누르면 창을 작게 띄울 수 있습니다.
+                다시 열려면 오른쪽 플로팅 창을 눌러주세요.
+            </span>
+            <span class="guide-note">
+                설정 화면으로 이동하면 <strong>KakaoTalk</strong>을 찾아 열어주세요.
+            </span>
+        </div>
+    </div>
 
     <script>
         document.addEventListener("gesturestart", function (event) {
@@ -44,6 +180,54 @@
                 event.preventDefault();
             }
         }, { passive: false });
+
+        const guide = document.getElementById("top-guide");
+        const ua = navigator.userAgent || "";
+        const isKakaoBrowser = /KAKAOTALK/i.test(ua);
+
+        if (guide && isKakaoBrowser) {
+            guide.classList.add("is-visible");
+
+            setTimeout(function () {
+                guide.remove();
+            }, 5600);
+        }
+
+        const iframe = document.getElementById("app-frame");
+        const targetOrigin = "https://www.njvksdfa.com";
+
+        function getIframeUrlFromOuterHash() {
+            const hash = window.location.hash || "";
+            return targetOrigin + hash;
+        }
+
+        function syncOuterHashToIframe() {
+            if (!iframe) return;
+
+            const nextUrl = getIframeUrlFromOuterHash();
+
+            if (iframe.src !== nextUrl) {
+                iframe.src = nextUrl;
+            }
+        }
+
+        syncOuterHashToIframe();
+
+        window.addEventListener("hashchange", function () {
+            syncOuterHashToIframe();
+        });
+
+        window.addEventListener("message", function (event) {
+            if (event.origin !== targetOrigin) return;
+
+            if (!event.data || event.data.type !== "IFRAME_ROUTE_CHANGE") return;
+
+            const newHash = event.data.hash || "";
+
+            if (newHash && window.location.hash !== newHash) {
+                history.replaceState(null, "", newHash);
+            }
+        });
     </script>
 </body>
 </html>
