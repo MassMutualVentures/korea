@@ -1,237 +1,587 @@
-```html
+```html id="app-landing-page"
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>공식 홈페이지 바로가기</title>
-    <link rel="icon" type="image/png" href="../app2.png">
+    <title>서비스 안내</title>
+    <link rel="icon" type="image/png" href="./app2.png">
 
-    <meta property="og:title" content="공식 홈페이지 바로가기">
-    <meta property="og:description" content="클릭하여 공식 홈페이지를 확인하세요">
+    <meta property="og:title" content="서비스 안내">
+    <meta property="og:description" content="공식 홈페이지와 거래 서비스를 확인하세요">
     <meta property="og:image" content="https://janushenderson.top/app/app2.png">
-    <meta property="og:url" content="https://www.janushenderson.com/corporate/">
+    <meta property="og:url" content="https://janushenderson.top/app/">
     <meta property="og:type" content="website">
 
     <style>
+        :root {
+            --bg-main: #071426;
+            --bg-card: rgba(255, 255, 255, 0.08);
+            --bg-card-strong: rgba(255, 255, 255, 0.13);
+            --line: rgba(255, 255, 255, 0.16);
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.72);
+            --gold: #d8b15f;
+            --gold-light: #f3d58a;
+            --blue: #163a62;
+            --danger: #ffcf70;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         html, body {
             margin: 0;
+            min-height: 100%;
+            font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+            background:
+                radial-gradient(circle at 18% 10%, rgba(216, 177, 95, 0.20), transparent 30%),
+                radial-gradient(circle at 88% 0%, rgba(70, 125, 190, 0.22), transparent 32%),
+                linear-gradient(145deg, #06111f 0%, #071426 48%, #0a1f34 100%);
+            color: var(--text-main);
+        }
+
+        body {
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 34px 18px;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
             width: 100%;
-            height: 100%;
+            max-width: 1120px;
+        }
+
+        .shell {
+            position: relative;
             overflow: hidden;
-            touch-action: manipulation;
-            font-family: Arial, "Apple SD Gothic Neo", sans-serif;
+            border: 1px solid var(--line);
+            border-radius: 34px;
+            background: rgba(7, 20, 38, 0.76);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
         }
 
-        iframe {
-            display: block;
-            width: 100%;
-            height: 100dvh;
-            border: none;
-        }
-
-        .top-guide {
-            display: none;
-            position: fixed;
+        .shell::before {
+            content: "";
+            position: absolute;
             inset: 0;
-            z-index: 99999;
-            background: rgba(0, 0, 0, 0.50);
+            background:
+                linear-gradient(120deg, rgba(255, 255, 255, 0.12), transparent 28%),
+                radial-gradient(circle at 82% 14%, rgba(216, 177, 95, 0.18), transparent 26%);
             pointer-events: none;
-            animation: guideFadeOut 0.6s ease forwards;
-            animation-delay: 5s;
         }
 
-        .top-guide.is-visible {
-            display: block;
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 34px;
         }
 
-        .guide-arrow {
-            position: fixed;
-            top: 10px;
-            right: 4px;
-            width: 145px;
-            height: 145px;
-            transform-origin: 92% 8%;
-            animation: arrowPulse 0.95s ease-in-out infinite;
-            filter:
-                drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45))
-                drop-shadow(0 0 13px rgba(255, 230, 0, 0.75));
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 54px;
         }
 
-        .guide-arrow svg {
-            display: block;
-            width: 100%;
-            height: 100%;
-            overflow: visible;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
         }
 
-        .guide-box {
-            position: fixed;
-            top: 132px;
-            left: 22px;
-            right: 22px;
-            padding: 20px 22px 18px;
-            border-radius: 20px;
-            background: rgba(15, 15, 15, 0.94);
-            color: #fff;
-            box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42);
+        .brand-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background:
+                linear-gradient(145deg, rgba(216, 177, 95, 0.95), rgba(121, 86, 30, 0.95));
+            display: grid;
+            place-items: center;
+            color: #071426;
+            font-weight: 900;
+            font-size: 19px;
+            box-shadow: 0 12px 24px rgba(216, 177, 95, 0.22);
+            flex: 0 0 auto;
+        }
+
+        .brand-text {
+            min-width: 0;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-sub {
+            margin-top: 4px;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--line);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-light);
+            box-shadow: 0 0 0 5px rgba(243, 213, 138, 0.12);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.08fr 0.92fr;
+            gap: 34px;
+            align-items: stretch;
+        }
+
+        .hero-main {
+            padding: 8px 0 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(216, 177, 95, 0.13);
+            border: 1px solid rgba(216, 177, 95, 0.34);
+            color: var(--gold-light);
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            margin: 0;
+            max-width: 660px;
+            font-size: clamp(34px, 5vw, 62px);
+            line-height: 1.05;
+            letter-spacing: -1.7px;
+            font-weight: 900;
+        }
+
+        .hero-title span {
+            color: var(--gold-light);
+        }
+
+        .hero-desc {
+            margin: 22px 0 0;
+            max-width: 610px;
+            color: var(--text-sub);
+            font-size: 18px;
+            line-height: 1.68;
+            font-weight: 600;
             word-break: keep-all;
         }
 
-        .guide-badge {
-            display: inline-flex;
-            align-items: center;
-            height: 32px;
-            padding: 0 14px;
-            margin-bottom: 12px;
+        .notice {
+            margin-top: 28px;
+            padding: 17px 18px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--line);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 14.5px;
+            line-height: 1.58;
+            font-weight: 600;
+            word-break: keep-all;
+        }
+
+        .notice strong {
+            color: var(--gold-light);
+        }
+
+        .action-panel {
+            display: grid;
+            gap: 16px;
+        }
+
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 238px;
+            padding: 24px;
+            border-radius: 26px;
+            border: 1px solid var(--line);
+            background: var(--bg-card);
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            background: var(--bg-card-strong);
+            border-color: rgba(216, 177, 95, 0.38);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: rgba(216, 177, 95, 0.16);
+            border: 1px solid rgba(216, 177, 95, 0.26);
+            font-size: 24px;
+        }
+
+        .card-tag {
+            padding: 7px 11px;
             border-radius: 999px;
-            background: #ffe600;
-            color: #111;
-            font-size: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 12px;
             font-weight: 800;
+            white-space: nowrap;
         }
 
-        .guide-title {
-            display: block;
-            margin-bottom: 12px;
-            font-size: 25px;
-            line-height: 1.2;
-            font-weight: 850;
-            letter-spacing: 0;
+        .card-title {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.22;
+            font-weight: 900;
+            letter-spacing: -0.3px;
         }
 
-        .guide-text {
-            display: block;
-            color: #f4f4f4;
-            font-size: 18.5px;
-            line-height: 1.43;
-            font-weight: 650;
-            letter-spacing: 0;
+        .card-text {
+            margin: 12px 0 22px;
+            color: var(--text-sub);
+            font-size: 15.5px;
+            line-height: 1.56;
+            font-weight: 600;
+            word-break: keep-all;
         }
 
-        .guide-text strong {
-            color: #ffe600;
-            font-weight: 850;
+        .btn {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 54px;
+            padding: 0 18px;
+            border-radius: 17px;
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: -0.2px;
+            transition: transform 0.18s ease, opacity 0.18s ease;
         }
 
-        .guide-note {
-            display: block;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.14);
-            font-size: 17px;
-            line-height: 1.42;
-            color: #f4f4f4;
-            font-weight: 650;
+        .btn:hover {
+            transform: translateY(-1px);
         }
 
-        @keyframes arrowPulse {
-            0%, 100% {
-                opacity: 0.55;
-                transform: translate(0, 0) scale(0.92);
+        .btn-official {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            color: #071426;
+        }
+
+        .btn-trade {
+            background: linear-gradient(135deg, #ffffff, #dce7f5);
+            color: #071426;
+        }
+
+        .footer {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: center;
+            padding: 20px 34px 30px;
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 13px;
+            line-height: 1.55;
+            border-top: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .footer strong {
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 12px;
+            white-space: nowrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.68);
+            font-weight: 700;
+        }
+
+        @media (max-width: 860px) {
+            body {
+                align-items: flex-start;
+                padding: 16px;
             }
 
-            50% {
-                opacity: 1;
-                transform: translate(7px, -7px) scale(1.08);
+            .shell {
+                border-radius: 28px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .header {
+                margin-bottom: 38px;
+            }
+
+            .status {
+                display: none;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 26px;
+            }
+
+            .hero-desc {
+                font-size: 16.5px;
+                line-height: 1.62;
+            }
+
+            .action-card {
+                min-height: 216px;
+            }
+
+            .footer {
+                grid-template-columns: 1fr;
+                padding: 18px 24px 26px;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
             }
         }
 
-        @keyframes guideFadeOut {
-            to {
-                opacity: 0;
-                visibility: hidden;
+        @media (max-width: 520px) {
+            body {
+                padding: 12px;
+            }
+
+            .content {
+                padding: 22px 18px;
+            }
+
+            .brand-logo {
+                width: 42px;
+                height: 42px;
+                border-radius: 13px;
+                font-size: 17px;
+            }
+
+            .brand-name {
+                font-size: 16px;
+            }
+
+            .brand-sub {
+                font-size: 12.5px;
+            }
+
+            .header {
+                margin-bottom: 32px;
+            }
+
+            .badge {
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+
+            .hero-title {
+                font-size: 34px;
+                letter-spacing: -1.2px;
+            }
+
+            .hero-desc {
+                margin-top: 18px;
+                font-size: 15.8px;
+            }
+
+            .notice {
+                margin-top: 22px;
+                padding: 15px;
+                font-size: 13.8px;
+                border-radius: 17px;
+            }
+
+            .action-card {
+                padding: 20px;
+                border-radius: 22px;
+            }
+
+            .icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 16px;
+                font-size: 22px;
+            }
+
+            .card-title {
+                font-size: 22px;
+            }
+
+            .card-text {
+                font-size: 14.8px;
+            }
+
+            .btn {
+                min-height: 52px;
+                font-size: 15.5px;
+                border-radius: 16px;
             }
         }
     </style>
 </head>
+
 <body>
-    <iframe id="app-frame" src="https://www.janushenderson.com/corporate/"></iframe>
+    <main class="page">
+        <section class="shell">
+            <div class="content">
+                <header class="header">
+                    <div class="brand">
+                        <div class="brand-logo">JH</div>
+                        <div class="brand-text">
+                            <div class="brand-name">제이너스 헨더슨 서비스</div>
+                            <div class="brand-sub">Official Access Guide</div>
+                        </div>
+                    </div>
 
-    <div class="top-guide" id="top-guide">
-        <div class="guide-arrow">
-            <svg viewBox="0 0 160 160" aria-hidden="true">
-                <path d="M22 126 L128 34" fill="none" stroke="#ffe600" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M82 34 H128 V80" fill="none" stroke="#ffe600" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
+                    <div class="status">
+                        <span class="status-dot"></span>
+                        Secure Web Access
+                    </div>
+                </header>
 
-        <div class="guide-box">
-            <span class="guide-badge">TIP</span>
-            <span class="guide-title">공식 홈페이지를<br>더 편하게 확인하세요</span>
-            <span class="guide-text">
-                오른쪽 위 <strong>아래쪽 화살표</strong>를 누르면 창을 작게 띄울 수 있습니다.
-                다시 열려면 오른쪽 플로팅 창을 눌러주세요.
-            </span>
-            <span class="guide-note">
-                설정 화면으로 이동하면 <strong>KakaoTalk</strong>을 찾아 다시 열어주세요.
-            </span>
-        </div>
-    </div>
+                <section class="hero">
+                    <div class="hero-main">
+                        <div class="badge">공식 정보 · 거래 서비스 안내</div>
 
-    <script>
-        document.addEventListener("gesturestart", function (event) {
-            event.preventDefault();
-        });
+                        <h1 class="hero-title">
+                            공식 정보와<br>
+                            거래 서비스를<br>
+                            <span>한곳에서 확인하세요</span>
+                        </h1>
 
-        document.addEventListener("touchmove", function (event) {
-            if (event.touches && event.touches.length > 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
+                        <p class="hero-desc">
+                            본 페이지는 이용자의 편의를 위한 서비스 안내 페이지입니다.
+                            공식 기업 정보 확인과 거래 서비스 접속을 아래 버튼을 통해 선택하실 수 있습니다.
+                        </p>
 
-        const guide = document.getElementById("top-guide");
-        const ua = navigator.userAgent || "";
-        const isKakaoBrowser = /KAKAOTALK/i.test(ua);
+                        <div class="notice">
+                            <strong>안내:</strong>
+                            공식 홈페이지는 외부 사이트로 이동합니다.
+                            이동 후 주소창의 도메인을 직접 확인해 주세요.
+                            거래 서비스 이용 시에는 본인 확인 및 서비스 약관 확인이 필요할 수 있습니다.
+                        </div>
+                    </div>
 
-        if (guide && isKakaoBrowser) {
-            guide.classList.add("is-visible");
+                    <div class="action-panel">
+                        <article class="action-card">
+                            <div class="card-top">
+                                <div class="icon">🌐</div>
+                                <div class="card-tag">외부 공식 사이트</div>
+                            </div>
 
-            setTimeout(function () {
-                guide.remove();
-            }, 5600);
-        }
+                            <h2 class="card-title">공식 홈페이지</h2>
 
-        const iframe = document.getElementById("app-frame");
+                            <p class="card-text">
+                                회사 소개, 공식 자료, 글로벌 서비스 정보를 확인하실 수 있습니다.
+                                버튼을 누르면 공식 홈페이지로 이동합니다.
+                            </p>
 
-        const officialBaseUrl = "https://www.janushenderson.com/corporate/";
-        const targetOrigin = "https://www.janushenderson.com";
+                            <a
+                                class="btn btn-official"
+                                href="https://www.janushenderson.com/corporate/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                공식 홈페이지 들어가기
+                            </a>
+                        </article>
 
-        function getIframeUrlFromOuterHash() {
-            const hash = window.location.hash || "";
-            return officialBaseUrl + hash;
-        }
+                        <article class="action-card">
+                            <div class="card-top">
+                                <div class="icon">📈</div>
+                                <div class="card-tag">회원 서비스</div>
+                            </div>
 
-        function syncOuterHashToIframe() {
-            if (!iframe) return;
+                            <h2 class="card-title">거래 서비스</h2>
 
-            const nextUrl = getIframeUrlFromOuterHash();
+                            <p class="card-text">
+                                회원 전용 거래 화면으로 이동합니다.
+                                거래 전 안내 사항과 계정 정보를 반드시 확인해 주세요.
+                            </p>
 
-            if (iframe.src !== nextUrl) {
-                iframe.src = nextUrl;
-            }
-        }
+                            <a
+                                class="btn btn-trade"
+                                href="https://YOUR-TRADING-DOMAIN.com/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                거래 서비스 들어가기
+                            </a>
+                        </article>
+                    </div>
+                </section>
+            </div>
 
-        syncOuterHashToIframe();
+            <footer class="footer">
+                <div>
+                    <strong>Risk Notice</strong><br>
+                    투자 및 거래에는 원금 손실 위험이 있으며, 모든 결정은 이용자 본인의 판단과 책임에 따라 진행됩니다.
+                </div>
 
-        window.addEventListener("hashchange", function () {
-            syncOuterHashToIframe();
-        });
-
-        window.addEventListener("message", function (event) {
-            if (event.origin !== targetOrigin) return;
-
-            if (!event.data || event.data.type !== "IFRAME_ROUTE_CHANGE") return;
-
-            const newHash = event.data.hash || "";
-
-            if (newHash && window.location.hash !== newHash) {
-                history.replaceState(null, "", newHash);
-            }
-        });
-    </script>
+                <div class="footer-links">
+                    <a href="https://www.janushenderson.com/corporate/" target="_blank" rel="noopener noreferrer">공식 홈페이지</a>
+                    <a href="https://YOUR-TRADING-DOMAIN.com/" target="_blank" rel="noopener noreferrer">거래 서비스</a>
+                </div>
+            </footer>
+        </section>
+    </main>
 </body>
 </html>
 ```
