@@ -1,4 +1,4 @@
-```html id="app-landing-page"
+```html id="app-landing-current-window"
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -25,8 +25,6 @@
             --text-sub: rgba(255, 255, 255, 0.72);
             --gold: #d8b15f;
             --gold-light: #f3d58a;
-            --blue: #163a62;
-            --danger: #ffcf70;
             --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
         }
 
@@ -56,6 +54,7 @@
         a {
             color: inherit;
             text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .page {
@@ -167,10 +166,6 @@
             grid-template-columns: 1.08fr 0.92fr;
             gap: 34px;
             align-items: stretch;
-        }
-
-        .hero-main {
-            padding: 8px 0 0;
         }
 
         .badge {
@@ -307,10 +302,16 @@
             font-weight: 900;
             letter-spacing: -0.2px;
             transition: transform 0.18s ease, opacity 0.18s ease;
+            cursor: pointer;
         }
 
         .btn:hover {
             transform: translateY(-1px);
+        }
+
+        .btn:active {
+            opacity: 0.86;
+            transform: scale(0.99);
         }
 
         .btn-official {
@@ -484,6 +485,7 @@
                 <header class="header">
                     <div class="brand">
                         <div class="brand-logo">JH</div>
+
                         <div class="brand-text">
                             <div class="brand-name">제이너스 헨더슨 서비스</div>
                             <div class="brand-sub">Official Access Guide</div>
@@ -513,7 +515,7 @@
 
                         <div class="notice">
                             <strong>안내:</strong>
-                            공식 홈페이지는 외부 사이트로 이동합니다.
+                            공식 홈페이지 또는 거래 서비스로 이동하면 현재 페이지를 벗어납니다.
                             이동 후 주소창의 도메인을 직접 확인해 주세요.
                             거래 서비스 이용 시에는 본인 확인 및 서비스 약관 확인이 필요할 수 있습니다.
                         </div>
@@ -536,8 +538,6 @@
                             <a
                                 class="btn btn-official"
                                 href="https://www.janushenderson.com/corporate/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                             >
                                 공식 홈페이지 들어가기
                             </a>
@@ -559,8 +559,6 @@
                             <a
                                 class="btn btn-trade"
                                 href="https://YOUR-TRADING-DOMAIN.com/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                             >
                                 거래 서비스 들어가기
                             </a>
@@ -576,8 +574,8 @@
                 </div>
 
                 <div class="footer-links">
-                    <a href="https://www.janushenderson.com/corporate/" target="_blank" rel="noopener noreferrer">공식 홈페이지</a>
-                    <a href="https://YOUR-TRADING-DOMAIN.com/" target="_blank" rel="noopener noreferrer">거래 서비스</a>
+                    <a href="https://www.janushenderson.com/corporate/">공식 홈페이지</a>
+                    <a href="https://YOUR-TRADING-DOMAIN.com/">거래 서비스</a>
                 </div>
             </footer>
         </section>
