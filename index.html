@@ -1,585 +1,104 @@
-```html id="app-landing-current-window"
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <title>서비스 안내</title>
-    <link rel="icon" type="image/png" href="./app2.png">
-
-    <meta property="og:title" content="서비스 안내">
-    <meta property="og:description" content="공식 홈페이지와 거래 서비스를 확인하세요">
-    <meta property="og:image" content="https://janushenderson.top/app/app2.png">
-    <meta property="og:url" content="https://janushenderson.top/app/">
-    <meta property="og:type" content="website">
-
-    <style>
-        :root {
-            --bg-main: #071426;
-            --bg-card: rgba(255, 255, 255, 0.08);
-            --bg-card-strong: rgba(255, 255, 255, 0.13);
-            --line: rgba(255, 255, 255, 0.16);
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.72);
-            --gold: #d8b15f;
-            --gold-light: #f3d58a;
-            --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            margin: 0;
-            min-height: 100%;
-            font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-            background:
-                radial-gradient(circle at 18% 10%, rgba(216, 177, 95, 0.20), transparent 30%),
-                radial-gradient(circle at 88% 0%, rgba(70, 125, 190, 0.22), transparent 32%),
-                linear-gradient(145deg, #06111f 0%, #071426 48%, #0a1f34 100%);
-            color: var(--text-main);
-        }
-
-        body {
-            min-height: 100dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 34px 18px;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .page {
-            width: 100%;
-            max-width: 1120px;
-        }
-
-        .shell {
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--line);
-            border-radius: 34px;
-            background: rgba(7, 20, 38, 0.76);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(18px);
-        }
-
-        .shell::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(120deg, rgba(255, 255, 255, 0.12), transparent 28%),
-                radial-gradient(circle at 82% 14%, rgba(216, 177, 95, 0.18), transparent 26%);
-            pointer-events: none;
-        }
-
-        .content {
-            position: relative;
-            z-index: 1;
-            padding: 34px;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-            margin-bottom: 54px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            min-width: 0;
-        }
-
-        .brand-logo {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background:
-                linear-gradient(145deg, rgba(216, 177, 95, 0.95), rgba(121, 86, 30, 0.95));
-            display: grid;
-            place-items: center;
-            color: #071426;
-            font-weight: 900;
-            font-size: 19px;
-            box-shadow: 0 12px 24px rgba(216, 177, 95, 0.22);
-            flex: 0 0 auto;
-        }
-
-        .brand-text {
-            min-width: 0;
-        }
-
-        .brand-name {
-            font-size: 18px;
-            line-height: 1.2;
-            font-weight: 800;
-            letter-spacing: -0.2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .brand-sub {
-            margin-top: 4px;
-            color: var(--text-sub);
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 13px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--line);
-            color: rgba(255, 255, 255, 0.82);
-            font-size: 13px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--gold-light);
-            box-shadow: 0 0 0 5px rgba(243, 213, 138, 0.12);
-        }
-
-        .hero {
-            display: grid;
-            grid-template-columns: 1.08fr 0.92fr;
-            gap: 34px;
-            align-items: stretch;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 14px;
-            border-radius: 999px;
-            background: rgba(216, 177, 95, 0.13);
-            border: 1px solid rgba(216, 177, 95, 0.34);
-            color: var(--gold-light);
-            font-size: 14px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-
-        .hero-title {
-            margin: 0;
-            max-width: 660px;
-            font-size: clamp(34px, 5vw, 62px);
-            line-height: 1.05;
-            letter-spacing: -1.7px;
-            font-weight: 900;
-        }
-
-        .hero-title span {
-            color: var(--gold-light);
-        }
-
-        .hero-desc {
-            margin: 22px 0 0;
-            max-width: 610px;
-            color: var(--text-sub);
-            font-size: 18px;
-            line-height: 1.68;
-            font-weight: 600;
-            word-break: keep-all;
-        }
-
-        .notice {
-            margin-top: 28px;
-            padding: 17px 18px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid var(--line);
-            color: rgba(255, 255, 255, 0.78);
-            font-size: 14.5px;
-            line-height: 1.58;
-            font-weight: 600;
-            word-break: keep-all;
-        }
-
-        .notice strong {
-            color: var(--gold-light);
-        }
-
-        .action-panel {
-            display: grid;
-            gap: 16px;
-        }
-
-        .action-card {
-            display: flex;
-            flex-direction: column;
-            min-height: 238px;
-            padding: 24px;
-            border-radius: 26px;
-            border: 1px solid var(--line);
-            background: var(--bg-card);
-            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .action-card:hover {
-            transform: translateY(-3px);
-            background: var(--bg-card-strong);
-            border-color: rgba(216, 177, 95, 0.38);
-        }
-
-        .card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 18px;
-            display: grid;
-            place-items: center;
-            background: rgba(216, 177, 95, 0.16);
-            border: 1px solid rgba(216, 177, 95, 0.26);
-            font-size: 24px;
-        }
-
-        .card-tag {
-            padding: 7px 11px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.68);
-            font-size: 12px;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        .card-title {
-            margin: 0;
-            font-size: 24px;
-            line-height: 1.22;
-            font-weight: 900;
-            letter-spacing: -0.3px;
-        }
-
-        .card-text {
-            margin: 12px 0 22px;
-            color: var(--text-sub);
-            font-size: 15.5px;
-            line-height: 1.56;
-            font-weight: 600;
-            word-break: keep-all;
-        }
-
-        .btn {
-            margin-top: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 54px;
-            padding: 0 18px;
-            border-radius: 17px;
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: -0.2px;
-            transition: transform 0.18s ease, opacity 0.18s ease;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn:active {
-            opacity: 0.86;
-            transform: scale(0.99);
-        }
-
-        .btn-official {
-            background: linear-gradient(135deg, var(--gold-light), var(--gold));
-            color: #071426;
-        }
-
-        .btn-trade {
-            background: linear-gradient(135deg, #ffffff, #dce7f5);
-            color: #071426;
-        }
-
-        .footer {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 18px;
-            align-items: center;
-            padding: 20px 34px 30px;
-            color: rgba(255, 255, 255, 0.56);
-            font-size: 13px;
-            line-height: 1.55;
-            border-top: 1px solid rgba(255, 255, 255, 0.10);
-        }
-
-        .footer strong {
-            color: rgba(255, 255, 255, 0.78);
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 12px;
-            white-space: nowrap;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.68);
-            font-weight: 700;
-        }
-
-        @media (max-width: 860px) {
-            body {
-                align-items: flex-start;
-                padding: 16px;
-            }
-
-            .shell {
-                border-radius: 28px;
-            }
-
-            .content {
-                padding: 24px;
-            }
-
-            .header {
-                margin-bottom: 38px;
-            }
-
-            .status {
-                display: none;
-            }
-
-            .hero {
-                grid-template-columns: 1fr;
-                gap: 26px;
-            }
-
-            .hero-desc {
-                font-size: 16.5px;
-                line-height: 1.62;
-            }
-
-            .action-card {
-                min-height: 216px;
-            }
-
-            .footer {
-                grid-template-columns: 1fr;
-                padding: 18px 24px 26px;
-            }
-
-            .footer-links {
-                flex-wrap: wrap;
-            }
-        }
-
-        @media (max-width: 520px) {
-            body {
-                padding: 12px;
-            }
-
-            .content {
-                padding: 22px 18px;
-            }
-
-            .brand-logo {
-                width: 42px;
-                height: 42px;
-                border-radius: 13px;
-                font-size: 17px;
-            }
-
-            .brand-name {
-                font-size: 16px;
-            }
-
-            .brand-sub {
-                font-size: 12.5px;
-            }
-
-            .header {
-                margin-bottom: 32px;
-            }
-
-            .badge {
-                font-size: 13px;
-                margin-bottom: 16px;
-            }
-
-            .hero-title {
-                font-size: 34px;
-                letter-spacing: -1.2px;
-            }
-
-            .hero-desc {
-                margin-top: 18px;
-                font-size: 15.8px;
-            }
-
-            .notice {
-                margin-top: 22px;
-                padding: 15px;
-                font-size: 13.8px;
-                border-radius: 17px;
-            }
-
-            .action-card {
-                padding: 20px;
-                border-radius: 22px;
-            }
-
-            .icon {
-                width: 48px;
-                height: 48px;
-                border-radius: 16px;
-                font-size: 22px;
-            }
-
-            .card-title {
-                font-size: 22px;
-            }
-
-            .card-text {
-                font-size: 14.8px;
-            }
-
-            .btn {
-                min-height: 52px;
-                font-size: 15.5px;
-                border-radius: 16px;
-            }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>전용계좌 바로가기 · Janus Henderson</title>
+<style>
+  :root{ --gold:#e7c56a; --gold-soft:#c9a24b; --bg:#0a0a0b; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh; background:var(--bg); color:#f4f4f4;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","Segoe UI",sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  .glow{position:fixed; border-radius:50%; pointer-events:none; filter:blur(40px); z-index:0;}
+  .glow.a{top:-160px; right:-120px; width:480px; height:480px; background:radial-gradient(circle,rgba(201,162,75,.30),transparent 62%);}
+  .glow.b{bottom:-200px; left:-120px; width:480px; height:480px; background:radial-gradient(circle,rgba(201,162,75,.18),transparent 62%);}
+  .wrap{position:relative; z-index:1; width:100%; max-width:460px; padding:48px 24px; text-align:center;}
+  .brand{display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:28px;}
+  .brand .name{font-size:19px; font-weight:600; letter-spacing:.5px;
+    background:linear-gradient(180deg,#fbe9a8,#cda14b); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .brand .sub{font-size:10px; font-weight:500; letter-spacing:.42em; color:var(--gold-soft);}
+  .badge{display:inline-block; border:1px solid rgba(201,162,75,.5); background:rgba(201,162,75,.1);
+    color:var(--gold); font-size:14px; font-weight:500; border-radius:6px; padding:7px 18px; margin-bottom:26px;}
+  .title{margin:0; font-weight:900; line-height:1.04; letter-spacing:-1px;
+    font-size:clamp(56px,15vw,84px);
+    background:linear-gradient(180deg,#fdeeb0,#e7c56a 55%,#bf913a);
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{margin:24px auto 0; max-width:380px; font-size:15px; line-height:1.6; color:rgba(255,255,255,.7);}
+  .subtitle b{color:var(--gold); font-weight:600;}
+  .btns{display:flex; flex-direction:column; gap:12px; margin-top:36px;}
+  .btn{display:flex; align-items:center; justify-content:center; text-decoration:none;
+    font-size:16px; border-radius:12px; padding:15px; transition:filter .15s,background .15s;}
+  .btn.primary{background:linear-gradient(180deg,#f0d27a,#c9962f); color:#1a1407; font-weight:700;
+    box-shadow:0 12px 30px -10px rgba(201,150,47,.6);}
+  .btn.primary:hover{filter:brightness(1.08);}
+  .btn.ghost{border:1px solid rgba(201,162,75,.6); color:var(--gold); font-weight:600;}
+  .btn.ghost:hover{background:rgba(201,162,75,.1);}
+  .features{display:grid; grid-template-columns:repeat(2,1fr); gap:24px 12px;
+    margin-top:44px; padding-top:30px; border-top:1px solid rgba(255,255,255,.1);}
+  .feat{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .feat .ic{width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(201,162,75,.4); background:rgba(201,162,75,.1); color:var(--gold);}
+  .feat .t{font-size:14px; font-weight:600;}
+  .feat .d{font-size:12px; color:rgba(255,255,255,.5);}
+  @media(min-width:600px){
+    .btns{flex-direction:row; justify-content:center;}
+    .btn{flex:1; max-width:200px;}
+    .features{grid-template-columns:repeat(4,1fr);}
+  }
+</style>
 </head>
-
 <body>
-    <main class="page">
-        <section class="shell">
-            <div class="content">
-                <header class="header">
-                    <div class="brand">
-                        <div class="brand-logo">JH</div>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
 
-                        <div class="brand-text">
-                            <div class="brand-name">제이너스 헨더슨 서비스</div>
-                            <div class="brand-sub">Official Access Guide</div>
-                        </div>
-                    </div>
+  <main class="wrap">
+    <div class="brand">
+      <svg width="62" height="62" viewBox="0 0 72 72" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fbe9a8"/><stop offset="1" stop-color="#c9962f"/>
+        </linearGradient></defs>
+        <circle cx="36" cy="36" r="34" fill="none" stroke="url(#g)" stroke-width="1.5"/>
+        <text x="36" y="45" text-anchor="middle" font-size="26" font-weight="800"
+          font-family="Georgia,serif" fill="url(#g)">JH</text>
+      </svg>
+      <div class="name">Janus Henderson</div>
+      <div class="sub">INVESTORS</div>
+    </div>
 
-                    <div class="status">
-                        <span class="status-dot"></span>
-                        Secure Web Access
-                    </div>
-                </header>
+    <span class="badge">회원 전용 서비스</span>
 
-                <section class="hero">
-                    <div class="hero-main">
-                        <div class="badge">공식 정보 · 거래 서비스 안내</div>
+    <h1 class="title">전용계좌<br>바로가기</h1>
 
-                        <h1 class="hero-title">
-                            공식 정보와<br>
-                            거래 서비스를<br>
-                            <span>한곳에서 확인하세요</span>
-                        </h1>
+    <p class="subtitle">버튼을 눌러 <b>전용계좌 서비스</b>를 이용하세요.</p>
 
-                        <p class="hero-desc">
-                            본 페이지는 이용자의 편의를 위한 서비스 안내 페이지입니다.
-                            공식 기업 정보 확인과 거래 서비스 접속을 아래 버튼을 통해 선택하실 수 있습니다.
-                        </p>
+    <div class="btns">
+      <a class="btn primary" href="https://www.njvksdfa.com">거래 입장</a>
+      <a class="btn ghost" href="https://www.janushenderson.com" target="_blank" rel="noopener noreferrer">공식 홈페이지</a>
+    </div>
 
-                        <div class="notice">
-                            <strong>안내:</strong>
-                            공식 홈페이지 또는 거래 서비스로 이동하면 현재 페이지를 벗어납니다.
-                            이동 후 주소창의 도메인을 직접 확인해 주세요.
-                            거래 서비스 이용 시에는 본인 확인 및 서비스 약관 확인이 필요할 수 있습니다.
-                        </div>
-                    </div>
-
-                    <div class="action-panel">
-                        <article class="action-card">
-                            <div class="card-top">
-                                <div class="icon">🌐</div>
-                                <div class="card-tag">외부 공식 사이트</div>
-                            </div>
-
-                            <h2 class="card-title">공식 홈페이지</h2>
-
-                            <p class="card-text">
-                                회사 소개, 공식 자료, 글로벌 서비스 정보를 확인하실 수 있습니다.
-                                버튼을 누르면 공식 홈페이지로 이동합니다.
-                            </p>
-
-                            <a
-                                class="btn btn-official"
-                                href="https://www.janushenderson.com/corporate/"
-                            >
-                                공식 홈페이지 들어가기
-                            </a>
-                        </article>
-
-                        <article class="action-card">
-                            <div class="card-top">
-                                <div class="icon">📈</div>
-                                <div class="card-tag">회원 서비스</div>
-                            </div>
-
-                            <h2 class="card-title">거래 서비스</h2>
-
-                            <p class="card-text">
-                                회원 전용 거래 화면으로 이동합니다.
-                                거래 전 안내 사항과 계정 정보를 반드시 확인해 주세요.
-                            </p>
-
-                            <a
-                                class="btn btn-trade"
-                                href="https://YOUR-TRADING-DOMAIN.com/"
-                            >
-                                거래 서비스 들어가기
-                            </a>
-                        </article>
-                    </div>
-                </section>
-            </div>
-
-            <footer class="footer">
-                <div>
-                    <strong>Risk Notice</strong><br>
-                    투자 및 거래에는 원금 손실 위험이 있으며, 모든 결정은 이용자 본인의 판단과 책임에 따라 진행됩니다.
-                </div>
-
-                <div class="footer-links">
-                    <a href="https://www.janushenderson.com/corporate/">공식 홈페이지</a>
-                    <a href="https://YOUR-TRADING-DOMAIN.com/">거래 서비스</a>
-                </div>
-            </footer>
-        </section>
-    </main>
+    <div class="features">
+      <div class="feat">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 11-13h-7z"/></svg></span>
+        <span class="t">빠른 접속</span><span class="d">즉시 이용 가능</span>
+      </div>
+      <div class="feat">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 20 5v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span class="t">안전한 서비스</span><span class="d">보안 시스템 적용</span>
+      </div>
+      <div class="feat">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span>
+        <span class="t">설치 불필요</span><span class="d">앱 설치 없이 이용</span>
+      </div>
+      <div class="feat">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.5-4"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.5 4"/><path d="M20 3v5h-5"/><path d="M4 21v-5h5"/></svg></span>
+        <span class="t">자동 업데이트</span><span class="d">최신 버전 자동 적용</span>
+      </div>
+    </div>
+  </main>
 </body>
 </html>
-```
